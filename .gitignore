@@ -1,3 +1,15 @@
+# React specific client build files
+client/build/
+client/node_modules/
+client/.env
+client/.env.local
+client/.env.development.local
+client/.env.test.local
+client/.env.production.local
+client/npm-debug.log*
+client/yarn-debug.log*
+client/yarn-error.log*
+
 # Dependencies
 node_modules/
 client/node_modules/
