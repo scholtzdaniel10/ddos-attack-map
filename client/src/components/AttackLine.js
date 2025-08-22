@@ -2,17 +2,17 @@ import React, { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
-function AttackLine({ start, end, threatLevel, animationSpeed = 1, attackData, isMobile }) {
+function AttackLine({ start, end, threatLevel, animationSpeed = 2, attackData, isMobile }) {
   const lineRef = useRef();
   const [progress, setProgress] = useState(0);
 
-  // Color based on threat level
+  // Color based on threat level - made more vibrant
   const getColor = () => {
     switch (threatLevel) {
-      case 'high': return '#ff4444';
-      case 'medium': return '#ffaa44';
-      case 'low': return '#44ff44';
-      default: return '#00ff41';
+      case 'high': return '#ff1111';     // Bright red
+      case 'medium': return '#ff8800';   // Bright orange  
+      case 'low': return '#22ff22';      // Bright green
+      default: return '#00ff88';         // Bright cyan
     }
   };
 
@@ -34,7 +34,7 @@ function AttackLine({ start, end, threatLevel, animationSpeed = 1, attackData, i
 
   useFrame((state, delta) => {
     if (lineRef.current && progress < 1) {
-      const newProgress = Math.min(progress + (delta * animationSpeed * 0.5), 1);
+      const newProgress = Math.min(progress + (delta * animationSpeed * 1.5), 1); // Faster animation
       setProgress(newProgress);
 
       // Update line geometry to show animation
@@ -54,9 +54,9 @@ function AttackLine({ start, end, threatLevel, animationSpeed = 1, attackData, i
     <line ref={lineRef} geometry={geometry}>
       <lineBasicMaterial
         color={getColor()}
-        linewidth={isMobile ? 1 : 2}
+        linewidth={isMobile ? 2 : 3}  // Thicker lines for better visibility
         transparent
-        opacity={isMobile ? 0.6 : 0.8}
+        opacity={isMobile ? 0.8 : 0.9}  // More opaque for better visibility
       />
     </line>
   );

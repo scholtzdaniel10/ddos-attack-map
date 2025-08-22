@@ -25,10 +25,10 @@ function attackReducer(state, action) {
   switch (action.type) {
     case 'ADD_ATTACK':
       const newAttack = action.payload;
-      const updatedAttacks = [...state.attacks, newAttack].slice(-100); // Keep last 100 attacks
+      const updatedAttacks = [...state.attacks, newAttack].slice(-200); // Keep last 200 attacks for high activity
       
-      // Update recent attacks (keep last 10)
-      const updatedRecentAttacks = [newAttack, ...state.recentAttacks].slice(0, 10);
+      // Update recent attacks (keep last 15 for better activity display)
+      const updatedRecentAttacks = [newAttack, ...state.recentAttacks].slice(0, 15);
       
       // Update threat counts
       const updatedThreatCounts = { ...state.threatCounts };
