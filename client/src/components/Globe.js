@@ -10,56 +10,23 @@ import AttackLine from './AttackLine';
 const GlobeContainer = styled.div`
   flex: 1;
   position: relative;
-  background: linear-gradient(45deg, #0a0a0a, #1a1a1a, #0f0f0f);
+  background: radial-gradient(circle at center, #0a0a0a 0%, #000000 100%);
 `;
 
-// Enhanced Earth component with realistic textures
+// Enhanced Earth component with GitHub-style globe appearance
 function Earth({ isMobile, children }) {
   const earthGroupRef = useRef(); // Reference to the entire Earth group
   const atmosphereRef = useRef();
   
-  // Load stylized Earth textures - monochromatic with raised continents
+  // Load actual Earth topology for continent shapes
   const earthTexture = useMemo(() => {
     const loader = new TextureLoader();
-    // Using a clean topographical map for continent definition
-    const texture = loader.load('https://unpkg.com/three-globe/example/img/earth-topology.png');
+    // Using the natural earth texture for realistic continent shapes
+    const texture = loader.load('https://unpkg.com/three-globe/example/img/earth-dark.jpg');
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
     return texture;
   }, []);
-
-  const displacementTexture = useMemo(() => {
-    const loader = new TextureLoader();
-    // Height map to make continents raised
-    const texture = loader.load('https://unpkg.com/three-globe/example/img/earth-topology.png');
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    return texture;
-  }, []);
-
-    // Create enhanced texture with better continent/ocean contrast
-    const simpleTexture = useMemo(() => {
-      const canvas = document.createElement('canvas');
-      canvas.width = 512;
-      canvas.height = 256;
-      const context = canvas.getContext('2d');
-      
-      // Create stronger gradient for better continent definition
-      const gradient = context.createLinearGradient(0, 0, 0, 256);
-      gradient.addColorStop(0, '#0a0a0a');    // Very dark ocean
-      gradient.addColorStop(0.2, '#1a1a1a');  // Deep ocean
-      gradient.addColorStop(0.5, '#2a2a2a');  // Shallow ocean/coast
-      gradient.addColorStop(0.7, '#4a4a4a');  // Continental shelf
-      gradient.addColorStop(1, '#6a6a6a');    // High elevation land
-      
-      context.fillStyle = gradient;
-      context.fillRect(0, 0, 512, 256);
-      
-      const texture = new THREE.CanvasTexture(canvas);
-      texture.wrapS = THREE.RepeatWrapping;
-      texture.wrapT = THREE.RepeatWrapping;
-      return texture;
-    }, []);
 
   useFrame(() => {
     if (earthGroupRef.current) {
@@ -74,18 +41,23 @@ function Earth({ isMobile, children }) {
 
   return (
     <group ref={earthGroupRef}>
-      {/* Main Earth sphere with prominent continents */}
+      {/* Main Earth sphere - GitHub style dark globe */}
       <mesh>
         <sphereGeometry args={[2, segments, segments]} />
-        <meshPhongMaterial
-          map={simpleTexture}
-          displacementMap={earthTexture}
-          displacementScale={0.25}  // Much stronger continent elevation
-          bumpMap={displacementTexture}
-          bumpScale={0.15}  // Enhanced bump mapping
-          shininess={5}
-          color="#4a4a4a"  // Lighter base to show details better
+        <meshLambertMaterial
+          color="#0d1117"  // GitHub dark theme background
           transparent={false}
+        />
+      </mesh>
+
+      {/* Continent overlay with Earth texture */}
+      <mesh>
+        <sphereGeometry args={[2.001, segments, segments]} />
+        <meshLambertMaterial
+          map={earthTexture}
+          color="#21262d"  // GitHub slightly lighter for continents
+          transparent={true}
+          opacity={0.8}
         />
       </mesh>
 
@@ -93,33 +65,21 @@ function Earth({ isMobile, children }) {
       <mesh ref={atmosphereRef}>
         <sphereGeometry args={[2.02, 32, 32]} />
         <meshBasicMaterial
-          color="#666666"
+          color="#30363d"
           transparent
-          opacity={0.08}
+          opacity={0.05}
           side={THREE.BackSide}
         />
       </mesh>
 
-      {/* Subtle wireframe overlay - reduced opacity to show continents */}
+      {/* Wireframe grid - GitHub style */}
       <mesh>
-        <sphereGeometry args={[2.008, isMobile ? 24 : 48, isMobile ? 24 : 48]} />
+        <sphereGeometry args={[2.005, isMobile ? 16 : 24, isMobile ? 16 : 24]} />
         <meshBasicMaterial
-          color="#00ff88"
+          color="#21262d"
           wireframe
           transparent
-          opacity={isMobile ? 0.02 : 0.03}  // Much more subtle
-        />
-      </mesh>
-
-      {/* Enhanced continent outline effect for better country visibility */}
-      <mesh>
-        <sphereGeometry args={[2.003, segments, segments]} />
-        <meshBasicMaterial
-          map={earthTexture}
-          transparent
-          opacity={0.4}  // More visible
-          color="#bbbbbb"  // Lighter color for better contrast
-          blending={THREE.AdditiveBlending}  // Better blending mode
+          opacity={0.15}
         />
       </mesh>
 
@@ -225,30 +185,31 @@ function Globe({ isPaused, animationSpeed, threatFilter, isMobile }) {
         performance={{ min: 0.1 }}
         dpr={isMobile ? Math.min(window.devicePixelRatio, 2) : window.devicePixelRatio}
       >
-        {/* Clean, neutral lighting for dark aesthetic */}
-        <ambientLight intensity={0.4} color="#ffffff" />
+        {/* GitHub-style neutral lighting - no blue tinting */}
+        <ambientLight intensity={0.3} color="#8b949e" />
         <directionalLight 
           position={[5, 3, 5]} 
-          intensity={1.0} 
-          color="#ffffff"
+          intensity={0.8} 
+          color="#c9d1d9"
           castShadow={!isMobile}
         />
         <directionalLight 
           position={[-3, 2, -4]} 
-          intensity={0.6} 
-          color="#f0f0f0"
+          intensity={0.4} 
+          color="#8b949e"
         />
-        <pointLight position={[10, 10, 10]} intensity={0.5} color="#ffffff" />
-        {!isMobile && <pointLight position={[-10, -10, -10]} intensity={0.3} color="#e0e0e0" />}
+        <pointLight position={[10, 10, 10]} intensity={0.3} color="#c9d1d9" />
+        {!isMobile && <pointLight position={[-10, -10, -10]} intensity={0.2} color="#6e7681" />}
 
-        {/* Enhanced background stars with neutral colors */}
+        {/* GitHub-style background stars */}
         <Stars 
           radius={400} 
           depth={100} 
-          count={isMobile ? 8000 : 30000} 
-          factor={5}
-          saturation={0.1}
+          count={isMobile ? 5000 : 15000} 
+          factor={3}
+          saturation={0}
           fade={true}
+          speed={0.5}
         />
 
         {/* Realistic Earth with attack points rotating together */}
