@@ -91,53 +91,88 @@ export function AttackProvider({ children }) {
   const [state, dispatch] = useReducer(attackReducer, initialState);
 
   useEffect(() => {
-    // WebSocket connection - handle both development and production
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsHost = process.env.NODE_ENV === 'production' 
-      ? window.location.host 
-      : 'localhost:3000';
-    const ws = new WebSocket(`${wsProtocol}//${wsHost}`);
+    // For production deployment, use polling instead of WebSocket
+    const isProduction = process.env.NODE_ENV === 'production' || window.location.hostname !== 'localhost';
     
-    ws.onopen = () => {
-      console.log('Connected to WebSocket');
+    if (isProduction) {
+      // Use API polling for production
       dispatch({ type: 'SET_CONNECTION_STATUS', payload: true });
-    };
-    
-    ws.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      if (message.type === 'attack') {
-        dispatch({ type: 'ADD_ATTACK', payload: message.data });
-      }
-    };
-    
-    ws.onclose = () => {
-      console.log('WebSocket connection closed');
-      dispatch({ type: 'SET_CONNECTION_STATUS', payload: false });
-    };
-    
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-      dispatch({ type: 'SET_CONNECTION_STATUS', payload: false });
-    };
+      
+      const pollAttacks = async () => {
+        try {
+          const response = await axios.get('/api/attacks?endpoint=attacks');
+          if (response.data.success && response.data.data.length > 0) {
+            response.data.data.forEach(attack => {
+              dispatch({ type: 'ADD_ATTACK', payload: attack });
+            });
+          }
+        } catch (error) {
+          console.error('Error polling attacks:', error);
+        }
+      };
+      
+      // Poll for new attacks every 2 seconds
+      const pollInterval = setInterval(pollAttacks, 2000);
+      
+      // Initial fetch
+      pollAttacks();
+      fetchStats();
+      fetchTopTargets();
 
-    // Fetch initial data
-    fetchStats();
-    fetchTopTargets();
+      // Clean up old attacks every minute
+      const cleanupInterval = setInterval(() => {
+        dispatch({ type: 'CLEAR_OLD_ATTACKS' });
+      }, 60000);
 
-    // Clean up old attacks every minute
-    const cleanupInterval = setInterval(() => {
-      dispatch({ type: 'CLEAR_OLD_ATTACKS' });
-    }, 60000);
+      return () => {
+        clearInterval(pollInterval);
+        clearInterval(cleanupInterval);
+      };
+    } else {
+      // WebSocket connection for development
+      const ws = new WebSocket('ws://localhost:3000');
+    
+      ws.onopen = () => {
+        console.log('Connected to WebSocket');
+        dispatch({ type: 'SET_CONNECTION_STATUS', payload: true });
+      };
+      
+      ws.onmessage = (event) => {
+        const message = JSON.parse(event.data);
+        if (message.type === 'attack') {
+          dispatch({ type: 'ADD_ATTACK', payload: message.data });
+        }
+      };
+      
+      ws.onclose = () => {
+        console.log('WebSocket connection closed');
+        dispatch({ type: 'SET_CONNECTION_STATUS', payload: false });
+      };
+      
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        dispatch({ type: 'SET_CONNECTION_STATUS', payload: false });
+      };
 
-    return () => {
-      ws.close();
-      clearInterval(cleanupInterval);
-    };
+      // Fetch initial data
+      fetchStats();
+      fetchTopTargets();
+
+      // Clean up old attacks every minute
+      const cleanupInterval = setInterval(() => {
+        dispatch({ type: 'CLEAR_OLD_ATTACKS' });
+      }, 60000);
+
+      return () => {
+        ws.close();
+        clearInterval(cleanupInterval);
+      };
+    }
   }, []);
 
   const fetchStats = async () => {
     try {
-      const response = await axios.get('/api/stats');
+      const response = await axios.get('/api/attacks?endpoint=stats');
       if (response.data.success) {
         dispatch({ type: 'UPDATE_STATS', payload: response.data.data });
       }
@@ -148,7 +183,7 @@ export function AttackProvider({ children }) {
 
   const fetchTopTargets = async () => {
     try {
-      const response = await axios.get('/api/stats');
+      const response = await axios.get('/api/attacks?endpoint=stats');
       if (response.data.success && response.data.data.topTargets) {
         dispatch({ type: 'UPDATE_TOP_TARGETS', payload: response.data.data.topTargets });
       }
@@ -159,7 +194,7 @@ export function AttackProvider({ children }) {
 
   const classifyIP = async (ip, additionalData = {}) => {
     try {
-      const response = await axios.post('/api/classify', {
+      const response = await axios.post('/api/attacks?endpoint=classify', {
         ip,
         additionalData
       });
