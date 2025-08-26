@@ -25,7 +25,7 @@ const threatClassifier = {
 };
 
 async function fetchAttackData() {
-    // Enhanced mock attacks with global IP addresses
+    // Enhanced mock attacks with more global IP addresses for higher activity
     const globalIPs = [
         { ip: '203.0.113.1', lat: 40.7128, lng: -74.0060, country: 'US' },
         { ip: '192.0.2.1', lat: 35.6762, lng: 139.6503, country: 'JP' },
@@ -36,11 +36,21 @@ async function fetchAttackData() {
         { ip: '172.217.164.142', lat: 37.4419, lng: -122.1430, country: 'US' },
         { ip: '13.107.42.14', lat: 47.6062, lng: -122.3321, country: 'US' },
         { ip: '157.240.241.35', lat: 37.7749, lng: -122.4194, country: 'US' },
-        { ip: '142.250.191.14', lat: 37.4419, lng: -122.1430, country: 'US' }
+        { ip: '142.250.191.14', lat: 37.4419, lng: -122.1430, country: 'US' },
+        { ip: '8.8.8.8', lat: 37.4223, lng: -122.0848, country: 'US' },
+        { ip: '1.1.1.1', lat: 37.7749, lng: -122.4194, country: 'US' },
+        { ip: '45.90.28.0', lat: 55.7558, lng: 37.6173, country: 'RU' },
+        { ip: '180.76.15.0', lat: 39.9042, lng: 116.4074, country: 'CN' },
+        { ip: '202.108.22.5', lat: 39.9042, lng: 116.4074, country: 'CN' },
+        { ip: '103.28.248.0', lat: 1.3521, lng: 103.8198, country: 'SG' },
+        { ip: '200.160.2.3', lat: -23.5505, lng: -46.6333, country: 'BR' },
+        { ip: '196.216.2.0', lat: -26.2041, lng: 28.0473, country: 'ZA' },
+        { ip: '41.233.139.0', lat: 30.0444, lng: 31.2357, country: 'EG' },
+        { ip: '202.12.29.0', lat: -37.8136, lng: 144.9631, country: 'AU' }
     ];
     
     const attacks = [];
-    const attackCount = 3 + Math.floor(Math.random() * 3); // 3-5 attacks
+    const attackCount = 5 + Math.floor(Math.random() * 8); // 5-12 attacks for high activity
     
     for (let i = 0; i < attackCount; i++) {
         const source = globalIPs[Math.floor(Math.random() * globalIPs.length)];
@@ -49,11 +59,12 @@ async function fetchAttackData() {
         if (source.ip !== target.ip) {
             const threatLevels = ['low', 'medium', 'high'];
             attacks.push({
-                id: Date.now() + i,
+                id: Date.now() + Math.random() * 1000 + i, // More unique IDs
                 source,
                 target,
                 threatLevel: threatLevels[Math.floor(Math.random() * threatLevels.length)],
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                duration: 3000 + Math.random() * 2000 // Attack duration for animation
             });
         }
     }
@@ -61,7 +72,7 @@ async function fetchAttackData() {
     return attacks;
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
     const { method, query } = req;
     
     // Enable CORS
