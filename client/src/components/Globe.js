@@ -196,10 +196,23 @@ function Globe({ isPaused, animationSpeed, threatFilter, isMobile }) {
   return (
     <GlobeContainer>
       <Canvas
-        camera={{ position: [0, 0, isMobile ? 6 : 8], fov: isMobile ? 60 : 45 }}
+        camera={{ position: [0, 0, isMobile ? 5 : 8], fov: isMobile ? 65 : 45 }}
         style={{ background: 'transparent' }}
-        performance={{ min: 0.1 }}
-        dpr={isMobile ? Math.min(window.devicePixelRatio, 2) : window.devicePixelRatio}
+        performance={{ 
+          min: isMobile ? 0.2 : 0.1,
+          max: isMobile ? 0.8 : 1.0,
+          debounce: isMobile ? 300 : 200
+        }}
+        dpr={isMobile ? Math.min(window.devicePixelRatio, 1.5) : window.devicePixelRatio}
+        gl={{
+          antialias: !isMobile,
+          alpha: true,
+          powerPreference: isMobile ? 'default' : 'high-performance',
+          stencil: false,
+          depth: true
+        }}
+        frameloop={isMobile ? 'demand' : 'always'}
+        resize={{ scroll: false, debounce: { scroll: 50, resize: 0 } }}
       >
         {/* Natural Earth lighting setup */}
         <ambientLight intensity={0.4} color="#ffffff" />
@@ -278,19 +291,31 @@ function Globe({ isPaused, animationSpeed, threatFilter, isMobile }) {
           })}
         </Earth>
 
-        {/* Orbit controls */}
+        {/* Enhanced orbit controls for mobile */}
         <OrbitControls
           enableZoom={true}
           enablePan={false}
           enableRotate={true}
-          zoomSpeed={isMobile ? 1.2 : 0.6}
-          rotateSpeed={isMobile ? 1.0 : 0.5}
-          minDistance={isMobile ? 2.5 : 3}
-          maxDistance={isMobile ? 12 : 15}
+          zoomSpeed={isMobile ? 1.5 : 0.6}
+          rotateSpeed={isMobile ? 1.2 : 0.5}
+          minDistance={isMobile ? 2.2 : 3}
+          maxDistance={isMobile ? 10 : 15}
+          enableDamping={true}
+          dampingFactor={isMobile ? 0.08 : 0.05}
           touches={{
             ONE: THREE.TOUCH.ROTATE,
             TWO: THREE.TOUCH.DOLLY_PAN
           }}
+          mouseButtons={{
+            LEFT: THREE.MOUSE.ROTATE,
+            MIDDLE: THREE.MOUSE.DOLLY,
+            RIGHT: THREE.MOUSE.PAN
+          }}
+          // Better mobile responsiveness
+          panSpeed={isMobile ? 1.5 : 1.0}
+          keyPanSpeed={isMobile ? 1.5 : 1.0}
+          autoRotate={false}
+          autoRotateSpeed={0.5}
         />
       </Canvas>
     </GlobeContainer>

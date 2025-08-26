@@ -17,6 +17,7 @@ const LoadingContainer = styled.div`
   align-items: center;
   justify-content: center;
   z-index: 9999;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 `;
 
 const LoadingContent = styled.div`
@@ -38,11 +39,27 @@ const LoadingTitle = styled.h2`
   font-size: 1.5rem;
   margin-bottom: 10px;
   text-shadow: 0 0 10px #00ff41;
+  
+  @media (max-width: 768px) {
+    font-size: 1.3rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.1rem;
+  }
 `;
 
 const LoadingText = styled.p`
   font-size: 1rem;
   opacity: 0.8;
+  
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+  }
 `;
 
 function LoadingScreen() {

@@ -8,13 +8,26 @@ const MobilePanelOverlay = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(15px);
   z-index: 2000;
   display: ${props => props.isVisible ? 'flex' : 'none'};
   flex-direction: column;
-  padding: 60px 20px 20px;
+  padding: 70px 15px 30px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  
+  /* Better touch scrolling */
+  @media (max-height: 600px) {
+    padding: 60px 15px 20px;
+  }
+  
+  /* Handle notch areas on newer phones */
+  padding-top: max(70px, env(safe-area-inset-top) + 20px);
+  padding-bottom: max(30px, env(safe-area-inset-bottom) + 10px);
+  padding-left: max(15px, env(safe-area-inset-left) + 15px);
+  padding-right: max(15px, env(safe-area-inset-right) + 15px);
 `;
 
 const MobilePanelContent = styled.div`
@@ -26,21 +39,45 @@ const MobilePanelContent = styled.div`
 
 const CloseButton = styled.button`
   position: absolute;
-  top: 70px;
-  right: 20px;
-  background: rgba(0, 255, 65, 0.1);
-  border: 1px solid #00ff41;
+  top: max(70px, env(safe-area-inset-top) + 20px);
+  right: max(20px, env(safe-area-inset-right) + 20px);
+  background: rgba(0, 255, 65, 0.15);
+  border: 2px solid #00ff41;
   color: #00ff41;
-  padding: 10px;
+  padding: 12px;
   border-radius: 50%;
   cursor: pointer;
-  font-size: 1.2rem;
-  width: 44px;
-  height: 44px;
+  font-size: 1.3rem;
+  width: 50px;
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
   touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: all 0.2s ease;
+  
+  /* Larger touch target for easier tapping */
+  &:before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+  }
+  
+  &:active {
+    background: rgba(0, 255, 65, 0.25);
+    transform: scale(0.95);
+  }
+  
+  @media (max-height: 600px) {
+    width: 44px;
+    height: 44px;
+    font-size: 1.1rem;
+    padding: 10px;
+  }
 `;
 
 const Section = styled.div`

@@ -13,7 +13,26 @@ const BottomPanelContainer = styled.div`
   display: flex;
   align-items: center;
   padding: 0 20px;
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: calc(20px + env(safe-area-inset-left));
+  padding-right: calc(20px + env(safe-area-inset-right));
   z-index: 1000;
+  
+  @media (max-width: 1024px) {
+    right: 0;
+    height: auto;
+    min-height: 60px;
+    padding: 15px;
+    padding-bottom: calc(15px + env(safe-area-inset-bottom));
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 12px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    min-height: 50px;
+  }
 `;
 
 const InfoDisplay = styled.div`
@@ -46,6 +65,18 @@ const Controls = styled.div`
   align-items: center;
   gap: 20px;
   font-size: 0.9rem;
+  
+  @media (max-width: 1024px) {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+  
+  @media (max-width: 768px) {
+    gap: 10px;
+    font-size: 0.8rem;
+  }
 `;
 
 const ControlGroup = styled.div`

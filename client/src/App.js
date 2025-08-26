@@ -17,6 +17,10 @@ const AppContainer = styled.div`
   overflow: hidden;
   height: 100vh;
   position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
 `;
 
 const MainContainer = styled.div`

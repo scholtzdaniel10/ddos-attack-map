@@ -15,7 +15,15 @@ const HeaderContainer = styled.header`
   align-items: center;
   justify-content: space-between;
   padding: 0 20px;
+  padding-top: env(safe-area-inset-top);
+  padding-left: calc(20px + env(safe-area-inset-left));
+  padding-right: calc(20px + env(safe-area-inset-right));
   z-index: 1000;
+  
+  @media (max-width: 768px) {
+    padding-left: calc(15px + env(safe-area-inset-left));
+    padding-right: calc(15px + env(safe-area-inset-right));
+  }
 `;
 
 const Title = styled.h1`
@@ -55,37 +63,39 @@ const ControlButton = styled.button`
   border: 1px solid #00ff41;
   color: #00ff41;
   padding: 8px 16px;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   font-family: inherit;
   font-size: 0.9rem;
   transition: all 0.3s ease;
   touch-action: manipulation;
+  user-select: none;
+  white-space: nowrap;
 
   &:hover {
     background: rgba(0, 255, 65, 0.2);
     box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+    transform: translateY(-1px);
   }
 
   &:active {
-    transform: scale(0.95);
+    transform: scale(0.95) translateY(0);
+    background: rgba(0, 255, 65, 0.3);
   }
   
   @media (max-width: 768px) {
+    padding: 12px 16px;
+    font-size: 0.85rem;
+    min-height: 48px;
+    min-width: 48px;
+    border-radius: 8px;
+  }
+  
+  @media (max-width: 480px) {
     padding: 10px 12px;
     font-size: 0.8rem;
     min-height: 44px;
     min-width: 44px;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 8px;
-    font-size: 1rem;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
 `;
 
