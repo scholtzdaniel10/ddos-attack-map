@@ -30,6 +30,9 @@ const MainContainer = styled.div`
   
   @media (max-width: 768px) {
     flex-direction: column;
+    height: calc(100vh - 60px);
+    justify-content: center;
+    align-items: center;
   }
 `;
 

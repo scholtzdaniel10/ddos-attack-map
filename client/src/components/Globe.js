@@ -11,6 +11,14 @@ const GlobeContainer = styled.div`
   flex: 1;
   position: relative;
   background: radial-gradient(circle at center, #0f1419 0%, #000511 100%);
+  
+  @media (max-width: 768px) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100%;
+  }
 `;
 
 // Enhanced Earth component with GitHub-style globe appearance
@@ -196,7 +204,7 @@ function Globe({ isPaused, animationSpeed, threatFilter, isMobile }) {
   return (
     <GlobeContainer>
       <Canvas
-        camera={{ position: [0, 0, isMobile ? 5 : 8], fov: isMobile ? 65 : 45 }}
+        camera={{ position: [0, 0, isMobile ? 6.5 : 8], fov: isMobile ? 55 : 45 }}
         style={{ background: 'transparent' }}
         performance={{ 
           min: isMobile ? 0.2 : 0.1,
@@ -298,10 +306,11 @@ function Globe({ isPaused, animationSpeed, threatFilter, isMobile }) {
           enableRotate={true}
           zoomSpeed={isMobile ? 1.5 : 0.6}
           rotateSpeed={isMobile ? 1.2 : 0.5}
-          minDistance={isMobile ? 2.2 : 3}
-          maxDistance={isMobile ? 10 : 15}
+          minDistance={isMobile ? 3.5 : 3}
+          maxDistance={isMobile ? 12 : 15}
           enableDamping={true}
           dampingFactor={isMobile ? 0.08 : 0.05}
+          target={[0, 0, 0]}
           touches={{
             ONE: THREE.TOUCH.ROTATE,
             TWO: THREE.TOUCH.DOLLY_PAN
