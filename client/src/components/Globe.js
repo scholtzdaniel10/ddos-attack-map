@@ -41,11 +41,11 @@ function Earth({ isMobile, children }) {
 
   return (
     <group ref={earthGroupRef}>
-      {/* Main Earth sphere - GitHub style dark globe */}
+      {/* Main Earth sphere - GitHub style but more visible */}
       <mesh>
         <sphereGeometry args={[2, segments, segments]} />
         <meshLambertMaterial
-          color="#0d1117"  // GitHub dark theme background
+          color="#1a1a2e"  // Darker blue instead of black for visibility
           transparent={false}
         />
       </mesh>
@@ -55,9 +55,9 @@ function Earth({ isMobile, children }) {
         <sphereGeometry args={[2.001, segments, segments]} />
         <meshLambertMaterial
           map={earthTexture}
-          color="#21262d"  // GitHub slightly lighter for continents
+          color="#16213e"  // Slightly blue-ish for continent visibility
           transparent={true}
-          opacity={0.8}
+          opacity={0.9}
         />
       </mesh>
 
@@ -65,21 +65,21 @@ function Earth({ isMobile, children }) {
       <mesh ref={atmosphereRef}>
         <sphereGeometry args={[2.02, 32, 32]} />
         <meshBasicMaterial
-          color="#30363d"
+          color="#0f3460"
           transparent
-          opacity={0.05}
+          opacity={0.1}
           side={THREE.BackSide}
         />
       </mesh>
 
-      {/* Wireframe grid - GitHub style */}
+      {/* Wireframe grid - more visible */}
       <mesh>
         <sphereGeometry args={[2.005, isMobile ? 16 : 24, isMobile ? 16 : 24]} />
         <meshBasicMaterial
-          color="#21262d"
+          color="#533483"
           wireframe
           transparent
-          opacity={0.15}
+          opacity={0.25}
         />
       </mesh>
 
@@ -216,18 +216,19 @@ function Globe({ isPaused, animationSpeed, threatFilter, isMobile }) {
         <Earth isMobile={isMobile}>
           {/* Attack visualization - now inside Earth so it rotates with the globe */}
           {!isPaused && activeAttacks.map((attack, index) => {
-            if (!attack.source?.coordinates || !attack.target?.coordinates) {
+            // Handle both coordinate formats: direct lat/lng or nested coordinates
+            const sourceLat = attack.source?.coordinates?.lat || attack.source?.lat;
+            const sourceLng = attack.source?.coordinates?.lng || attack.source?.lng;
+            const targetLat = attack.target?.coordinates?.lat || attack.target?.lat;
+            const targetLng = attack.target?.coordinates?.lng || attack.target?.lng;
+
+            if (!sourceLat || !sourceLng || !targetLat || !targetLng) {
+              console.log('Missing coordinates for attack:', attack);
               return null;
             }
 
-            const sourcePos = latLngToVector3(
-              attack.source.coordinates.lat,
-              attack.source.coordinates.lng
-            );
-            const targetPos = latLngToVector3(
-              attack.target.coordinates.lat,
-              attack.target.coordinates.lng
-            );
+            const sourcePos = latLngToVector3(sourceLat, sourceLng);
+            const targetPos = latLngToVector3(targetLat, targetLng);
 
             return (
               <group key={attack.id || index}>
