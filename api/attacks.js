@@ -25,46 +25,107 @@ const threatClassifier = {
 };
 
 async function fetchAttackData() {
-    // Enhanced mock attacks with more global IP addresses for higher activity
+    // Enhanced mock attacks with more global IP addresses and realistic patterns
     const globalIPs = [
-        { ip: '203.0.113.1', lat: 40.7128, lng: -74.0060, country: 'US' },
-        { ip: '192.0.2.1', lat: 35.6762, lng: 139.6503, country: 'JP' },
-        { ip: '198.51.100.1', lat: 51.5074, lng: -0.1278, country: 'GB' },
-        { ip: '185.199.108.153', lat: 52.5200, lng: 13.4050, country: 'DE' },
-        { ip: '151.101.193.140', lat: 48.8566, lng: 2.3522, country: 'FR' },
-        { ip: '104.16.249.249', lat: 37.7749, lng: -122.4194, country: 'US' },
-        { ip: '172.217.164.142', lat: 37.4419, lng: -122.1430, country: 'US' },
-        { ip: '13.107.42.14', lat: 47.6062, lng: -122.3321, country: 'US' },
-        { ip: '157.240.241.35', lat: 37.7749, lng: -122.4194, country: 'US' },
-        { ip: '142.250.191.14', lat: 37.4419, lng: -122.1430, country: 'US' },
-        { ip: '8.8.8.8', lat: 37.4223, lng: -122.0848, country: 'US' },
-        { ip: '1.1.1.1', lat: 37.7749, lng: -122.4194, country: 'US' },
-        { ip: '45.90.28.0', lat: 55.7558, lng: 37.6173, country: 'RU' },
-        { ip: '180.76.15.0', lat: 39.9042, lng: 116.4074, country: 'CN' },
-        { ip: '202.108.22.5', lat: 39.9042, lng: 116.4074, country: 'CN' },
-        { ip: '103.28.248.0', lat: 1.3521, lng: 103.8198, country: 'SG' },
-        { ip: '200.160.2.3', lat: -23.5505, lng: -46.6333, country: 'BR' },
-        { ip: '196.216.2.0', lat: -26.2041, lng: 28.0473, country: 'ZA' },
-        { ip: '41.233.139.0', lat: 30.0444, lng: 31.2357, country: 'EG' },
-        { ip: '202.12.29.0', lat: -37.8136, lng: 144.9631, country: 'AU' }
+        // Major US cities and data centers
+        { ip: '203.0.113.1', lat: 40.7128, lng: -74.0060, country: 'US', city: 'New York' },
+        { ip: '104.16.249.249', lat: 37.7749, lng: -122.4194, country: 'US', city: 'San Francisco' },
+        { ip: '172.217.164.142', lat: 37.4419, lng: -122.1430, country: 'US', city: 'Mountain View' },
+        { ip: '13.107.42.14', lat: 47.6062, lng: -122.3321, country: 'US', city: 'Seattle' },
+        { ip: '157.240.241.35', lat: 33.9425, lng: -118.4081, country: 'US', city: 'Los Angeles' },
+        
+        // Major international locations
+        { ip: '192.0.2.1', lat: 35.6762, lng: 139.6503, country: 'JP', city: 'Tokyo' },
+        { ip: '198.51.100.1', lat: 51.5074, lng: -0.1278, country: 'GB', city: 'London' },
+        { ip: '185.199.108.153', lat: 52.5200, lng: 13.4050, country: 'DE', city: 'Berlin' },
+        { ip: '151.101.193.140', lat: 48.8566, lng: 2.3522, country: 'FR', city: 'Paris' },
+        { ip: '8.8.8.8', lat: 37.4223, lng: -122.0848, country: 'US', city: 'Google DNS' },
+        { ip: '1.1.1.1', lat: 37.7749, lng: -122.4194, country: 'US', city: 'Cloudflare DNS' },
+        
+        // Common attack origins (known botnet/malicious regions)
+        { ip: '45.90.28.0', lat: 55.7558, lng: 37.6173, country: 'RU', city: 'Moscow' },
+        { ip: '180.76.15.0', lat: 39.9042, lng: 116.4074, country: 'CN', city: 'Beijing' },
+        { ip: '202.108.22.5', lat: 31.2304, lng: 121.4737, country: 'CN', city: 'Shanghai' },
+        { ip: '103.28.248.0', lat: 1.3521, lng: 103.8198, country: 'SG', city: 'Singapore' },
+        { ip: '200.160.2.3', lat: -23.5505, lng: -46.6333, country: 'BR', city: 'São Paulo' },
+        { ip: '196.216.2.0', lat: -26.2041, lng: 28.0473, country: 'ZA', city: 'Johannesburg' },
+        { ip: '41.233.139.0', lat: 30.0444, lng: 31.2357, country: 'EG', city: 'Cairo' },
+        { ip: '202.12.29.0', lat: -37.8136, lng: 144.9631, country: 'AU', city: 'Melbourne' },
+        
+        // European data centers
+        { ip: '46.23.104.0', lat: 59.9311, lng: 30.3609, country: 'RU', city: 'St. Petersburg' },
+        { ip: '217.160.0.0', lat: 50.1109, lng: 8.6821, country: 'DE', city: 'Frankfurt' },
+        { ip: '94.142.241.0', lat: 55.6761, lng: 12.5683, country: 'DK', city: 'Copenhagen' },
+        
+        // Asian tech hubs
+        { ip: '14.139.180.0', lat: 28.7041, lng: 77.1025, country: 'IN', city: 'New Delhi' },
+        { ip: '125.6.190.0', lat: 37.5665, lng: 126.9780, country: 'KR', city: 'Seoul' },
+        { ip: '203.104.144.0', lat: 25.0330, lng: 121.5654, country: 'TW', city: 'Taipei' }
+    ];
+    
+    // Realistic attack patterns
+    const attackTypes = [
+        { type: 'DDoS', weight: 40, threatBias: 'high' },
+        { type: 'Botnet', weight: 25, threatBias: 'medium' },
+        { type: 'Scanning', weight: 20, threatBias: 'low' },
+        { type: 'Intrusion', weight: 10, threatBias: 'high' },
+        { type: 'Malware', weight: 5, threatBias: 'medium' }
     ];
     
     const attacks = [];
-    const attackCount = 5 + Math.floor(Math.random() * 8); // 5-12 attacks for high activity
+    const attackCount = 1; // Single attack for continuous flow
     
     for (let i = 0; i < attackCount; i++) {
-        const source = globalIPs[Math.floor(Math.random() * globalIPs.length)];
-        const target = globalIPs[Math.floor(Math.random() * globalIPs.length)];
+        // Bias source selection toward known attack origins
+        const isFromKnownAttacker = Math.random() < 0.6;
+        const sourcePool = isFromKnownAttacker 
+            ? globalIPs.filter(ip => ['RU', 'CN', 'KP'].includes(ip.country))
+            : globalIPs;
+        
+        // Bias target selection toward major infrastructure
+        const isTargetingInfrastructure = Math.random() < 0.7;
+        const targetPool = isTargetingInfrastructure
+            ? globalIPs.filter(ip => ['US', 'GB', 'DE', 'JP'].includes(ip.country))
+            : globalIPs;
+        
+        const source = sourcePool[Math.floor(Math.random() * sourcePool.length)];
+        const target = targetPool[Math.floor(Math.random() * targetPool.length)];
         
         if (source.ip !== target.ip) {
-            const threatLevels = ['low', 'medium', 'high'];
+            // Select attack type based on weights
+            const random = Math.random() * 100;
+            let cumulative = 0;
+            let selectedType = attackTypes[0];
+            
+            for (const type of attackTypes) {
+                cumulative += type.weight;
+                if (random <= cumulative) {
+                    selectedType = type;
+                    break;
+                }
+            }
+            
+            // Determine threat level with bias
+            let threatLevel;
+            const threatRandom = Math.random();
+            if (selectedType.threatBias === 'high') {
+                threatLevel = threatRandom < 0.6 ? 'high' : threatRandom < 0.85 ? 'medium' : 'low';
+            } else if (selectedType.threatBias === 'medium') {
+                threatLevel = threatRandom < 0.3 ? 'high' : threatRandom < 0.7 ? 'medium' : 'low';
+            } else {
+                threatLevel = threatRandom < 0.1 ? 'high' : threatRandom < 0.3 ? 'medium' : 'low';
+            }
+            
             attacks.push({
-                id: Date.now() + Math.random() * 1000 + i, // More unique IDs
+                id: Date.now() + Math.random() * 1000 + i,
                 source,
                 target,
-                threatLevel: threatLevels[Math.floor(Math.random() * threatLevels.length)],
+                threatLevel,
+                attackType: selectedType.type,
                 timestamp: new Date().toISOString(),
-                duration: 3000 + Math.random() * 2000 // Attack duration for animation
+                duration: threatLevel === 'high' ? 4000 + Math.random() * 2000 : 
+                         threatLevel === 'medium' ? 3000 + Math.random() * 1500 : 
+                         2500 + Math.random() * 1000
             });
         }
     }
