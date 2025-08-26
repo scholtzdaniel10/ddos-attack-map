@@ -68,9 +68,9 @@ function attackReducer(state, action) {
       
     case 'CLEAR_OLD_ATTACKS':
       const now = Date.now();
-      const fiveMinutesAgo = now - 5 * 60 * 1000;
+      const attackDuration = 6000; // 6 seconds - enough time for attack animation to complete
       const filteredAttacks = state.attacks.filter(attack => 
-        new Date(attack.timestamp).getTime() > fiveMinutesAgo
+        new Date(attack.timestamp).getTime() > (now - attackDuration)
       );
       
       return {
@@ -95,38 +95,55 @@ export function AttackProvider({ children }) {
     const isProduction = process.env.NODE_ENV === 'production' || window.location.hostname !== 'localhost';
     
     if (isProduction) {
-      // Use API polling for production
+      // Use continuous attack generation for production to simulate real DDoS activity
       dispatch({ type: 'SET_CONNECTION_STATUS', payload: true });
       
-      const pollAttacks = async () => {
+      const generateSingleAttack = async () => {
         try {
           const response = await axios.get('/api/attacks?endpoint=attacks');
           if (response.data.success && response.data.data.length > 0) {
-            response.data.data.forEach(attack => {
-              dispatch({ type: 'ADD_ATTACK', payload: attack });
-            });
+            // Pick just one random attack from the batch to make it continuous
+            const randomAttack = response.data.data[Math.floor(Math.random() * response.data.data.length)];
+            // Add random delay to make timing more realistic
+            const delay = Math.random() * 1000; // 0-1 second delay
+            setTimeout(() => {
+              const attackWithNewId = {
+                ...randomAttack,
+                id: Date.now() + Math.random() * 1000,
+                timestamp: new Date().toISOString()
+              };
+              dispatch({ type: 'ADD_ATTACK', payload: attackWithNewId });
+            }, delay);
           }
         } catch (error) {
-          console.error('Error polling attacks:', error);
+          console.error('Error generating attack:', error);
         }
       };
       
-      // Poll for new attacks every 2 seconds
-      const pollInterval = setInterval(pollAttacks, 2000);
+      // Generate individual attacks at random intervals (500ms to 2 seconds)
+      const scheduleNextAttack = () => {
+        const nextInterval = 500 + Math.random() * 1500; // 500ms - 2s
+        setTimeout(() => {
+          generateSingleAttack();
+          scheduleNextAttack(); // Schedule the next one
+        }, nextInterval);
+      };
       
-      // Initial fetch
-      pollAttacks();
+      // Start the continuous attack generation
+      scheduleNextAttack();
+      
+      // Initial fetch for stats
       fetchStats();
       fetchTopTargets();
 
-      // Clean up old attacks every minute
+      // Clean up completed attacks every 5 seconds
       const cleanupInterval = setInterval(() => {
         dispatch({ type: 'CLEAR_OLD_ATTACKS' });
-      }, 60000);
+      }, 5000);
 
       return () => {
-        clearInterval(pollInterval);
         clearInterval(cleanupInterval);
+        // Note: scheduleNextAttack uses setTimeout, so no interval to clear
       };
     } else {
       // WebSocket connection for development
