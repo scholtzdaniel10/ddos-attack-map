@@ -10,7 +10,7 @@ import AttackLine from './AttackLine';
 const GlobeContainer = styled.div`
   flex: 1;
   position: relative;
-  background: radial-gradient(circle at center, #0a0a0a 0%, #000000 100%);
+  background: radial-gradient(circle at center, #0f1419 0%, #000511 100%);
 `;
 
 // Enhanced Earth component with GitHub-style globe appearance
@@ -18,13 +18,27 @@ function Earth({ isMobile, children }) {
   const earthGroupRef = useRef(); // Reference to the entire Earth group
   const atmosphereRef = useRef();
   
-  // Load actual Earth topology for continent shapes
+  // Load actual Earth textures for realistic appearance
   const earthTexture = useMemo(() => {
     const loader = new TextureLoader();
-    // Using the natural earth texture for realistic continent shapes
-    const texture = loader.load('https://unpkg.com/three-globe/example/img/earth-dark.jpg');
+    // Using NASA's Blue Marble texture for realistic Earth
+    const texture = loader.load('https://cdn.jsdelivr.net/npm/three-globe@2.24.1/example/img/earth-blue-marble.jpg');
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
+    return texture;
+  }, []);
+
+  const bumpTexture = useMemo(() => {
+    const loader = new TextureLoader();
+    // Earth bump map for topographical detail
+    const texture = loader.load('https://cdn.jsdelivr.net/npm/three-globe@2.24.1/example/img/earth-topology.png');
+    return texture;
+  }, []);
+
+  const nightTexture = useMemo(() => {
+    const loader = new TextureLoader();
+    // Earth night lights texture
+    const texture = loader.load('https://cdn.jsdelivr.net/npm/three-globe@2.24.1/example/img/earth-night.jpg');
     return texture;
   }, []);
 
@@ -41,45 +55,47 @@ function Earth({ isMobile, children }) {
 
   return (
     <group ref={earthGroupRef}>
-      {/* Main Earth sphere - GitHub style but more visible */}
+      {/* Main Earth sphere with realistic NASA Blue Marble texture */}
       <mesh>
         <sphereGeometry args={[2, segments, segments]} />
         <meshLambertMaterial
-          color="#1a1a2e"  // Darker blue instead of black for visibility
-          transparent={false}
+          map={earthTexture}
+          bumpMap={bumpTexture}
+          bumpScale={0.05}
+          color="#ffffff"
         />
       </mesh>
 
-      {/* Continent overlay with Earth texture */}
+      {/* Night lights overlay - visible on dark side */}
       <mesh>
         <sphereGeometry args={[2.001, segments, segments]} />
-        <meshLambertMaterial
-          map={earthTexture}
-          color="#16213e"  // Slightly blue-ish for continent visibility
-          transparent={true}
-          opacity={0.9}
+        <meshBasicMaterial
+          map={nightTexture}
+          transparent
+          opacity={0.3}
+          blending={THREE.AdditiveBlending}
         />
       </mesh>
 
       {/* Subtle atmospheric glow */}
       <mesh ref={atmosphereRef}>
-        <sphereGeometry args={[2.02, 32, 32]} />
+        <sphereGeometry args={[2.05, 32, 32]} />
         <meshBasicMaterial
-          color="#0f3460"
+          color="#4fc3f7"
           transparent
           opacity={0.1}
           side={THREE.BackSide}
         />
       </mesh>
 
-      {/* Wireframe grid - more visible */}
+      {/* Subtle wireframe grid for cyber aesthetic */}
       <mesh>
-        <sphereGeometry args={[2.005, isMobile ? 16 : 24, isMobile ? 16 : 24]} />
+        <sphereGeometry args={[2.008, isMobile ? 16 : 24, isMobile ? 16 : 24]} />
         <meshBasicMaterial
-          color="#533483"
+          color="#00bcd4"
           wireframe
           transparent
-          opacity={0.25}
+          opacity={0.1}
         />
       </mesh>
 
@@ -185,31 +201,31 @@ function Globe({ isPaused, animationSpeed, threatFilter, isMobile }) {
         performance={{ min: 0.1 }}
         dpr={isMobile ? Math.min(window.devicePixelRatio, 2) : window.devicePixelRatio}
       >
-        {/* GitHub-style neutral lighting - no blue tinting */}
-        <ambientLight intensity={0.3} color="#8b949e" />
+        {/* Natural Earth lighting setup */}
+        <ambientLight intensity={0.4} color="#ffffff" />
         <directionalLight 
           position={[5, 3, 5]} 
-          intensity={0.8} 
-          color="#c9d1d9"
+          intensity={1.2} 
+          color="#ffffff"
           castShadow={!isMobile}
         />
         <directionalLight 
           position={[-3, 2, -4]} 
-          intensity={0.4} 
-          color="#8b949e"
+          intensity={0.3} 
+          color="#87ceeb"
         />
-        <pointLight position={[10, 10, 10]} intensity={0.3} color="#c9d1d9" />
-        {!isMobile && <pointLight position={[-10, -10, -10]} intensity={0.2} color="#6e7681" />}
+        <pointLight position={[10, 10, 10]} intensity={0.2} color="#ffffff" />
+        {!isMobile && <pointLight position={[-10, -10, -10]} intensity={0.1} color="#4169e1" />}
 
-        {/* GitHub-style background stars */}
+        {/* Realistic space background stars */}
         <Stars 
-          radius={400} 
+          radius={500} 
           depth={100} 
-          count={isMobile ? 5000 : 15000} 
-          factor={3}
-          saturation={0}
+          count={isMobile ? 8000 : 20000} 
+          factor={4}
+          saturation={0.1}
           fade={true}
-          speed={0.5}
+          speed={0.3}
         />
 
         {/* Realistic Earth with attack points rotating together */}
